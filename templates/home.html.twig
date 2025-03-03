@@ -1,0 +1,109 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'dashboard.title'|trans }}{% endblock %}
+
+{% block body %}
+    <div class="container mx-auto px-4">
+        <h1 class="text-3xl font-bold text-center mb-6">{{ 'dashboard.main_panel'|trans }}</h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                <h2 class="text-xl font-semibold">{{ 'dashboard.reservation_count'|trans }}</h2>
+                <p class="text-3xl font-bold">{{ reservationCount }}</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                <h2 class="text-xl font-semibold">{{ 'dashboard.restaurant_count'|trans }}</h2>
+                <p class="text-3xl font-bold">{{ restaurantCount }}</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h2 class="text-xl font-semibold mb-4">{{ 'dashboard.reservations_per_day'|trans }}</h2>
+                <canvas id="reservationsChart" class="w-full h-64"></canvas>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h2 class="text-xl font-semibold mb-4">{{ 'dashboard.restaurant_reservations_per_day'|trans }}</h2>
+                <canvas id="restaurantReservationsChart" class="w-full h-64"></canvas>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-bold mb-4">{{ 'dashboard.reservations_in_restaurants'|trans }}</h2>
+            <div class="overflow-y-auto max-h-96">
+                <table class="w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="border border-gray-300 px-4 py-2 text-left">{{ 'dashboard.restaurant'|trans }}</th>
+                            {% for date in reservationsPerDay|keys %}
+                                <th class="border border-gray-300 px-4 py-2">{{ date }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for restaurant, reservations in reservationsByRestaurantPerDay %}
+                            <tr class="hover:bg-gray-100">
+                                <td class="border border-gray-300 px-4 py-2 font-semibold">{{ restaurant }}</td>
+                                {% for date in reservationsPerDay|keys %}
+                                    <td class="border border-gray-300 px-4 py-2 text-center">
+                                        {{ reservations[date] ?? 0 }}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const reservationsData = {{ reservationsPerDay|json_encode()|raw }};
+            const labels = Object.keys(reservationsData);
+            const data = Object.values(reservationsData);
+
+            new Chart(document.getElementById("reservationsChart"), {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "{{ 'dashboard.reservations_per_day'|trans }}",
+                        data: data,
+                        backgroundColor: "rgba(54, 162, 235, 0.6)"
+                    }]
+                },
+                options: {
+                    responsive: true,
+                }
+            });
+
+            const restaurantData = {{ reservationsByRestaurantPerDay|json_encode()|raw }};
+            const allDates = labels;
+            const datasets = [];
+
+            Object.entries(restaurantData).forEach(([restaurant, dailyReservations]) => {
+                const sortedReservations = allDates.map(date => dailyReservations[date] || 0);
+                datasets.push({
+                    label: restaurant,
+                    data: sortedReservations,
+                    borderColor: getRandomColor(),
+                    fill: false
+                });
+            });
+
+            new Chart(document.getElementById("restaurantReservationsChart"), {
+                type: 'line',
+                data: {
+                    labels: allDates,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                }
+            });
+
+            function getRandomColor() {
+                return `hsl(${Math.random() * 360}, 70%, 50%)`;
+            }
+        });
+    </script>
+{% endblock %}

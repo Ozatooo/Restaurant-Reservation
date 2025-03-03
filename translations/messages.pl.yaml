@@ -1,0 +1,34 @@
+dashboard:
+  title: "Panel Główny"
+  main_panel: "Panel Główny"
+  reservation_count: "Ilość Rezerwacji"
+  restaurant_count: "Ilość Restauracji"
+  reservations_per_day: "Liczba rezerwacji na dzień"
+  restaurant_reservations_per_day: "Ilość rezerwacji w restauracjach na dzień"
+  reservations_in_restaurants: "Rezerwacje w restauracjach"
+  restaurant: "Restauracja"
+
+reservations:
+  title: "Rezerwacje"
+  list: "Lista Rezerwacji"
+  search: "Wyszukaj rezerwację..."
+  name: "Imię"
+  table: "Stolik"
+  date: "Data"
+  no_reservations: "Brak rezerwacji"
+
+reservation:
+  select:
+    title: "Wybierz restaurację"
+    choose_restaurant: "Wybierz restaurację, aby dokonać rezerwacji"
+  form:
+    customer_name: "Imię i nazwisko"
+    table: "Stolik"
+    select_table: "Wybierz stolik..."
+    date: "Data"
+    book: "Zarezerwuj"
+    loading: "Ładowanie..."
+    loading_error: "Błąd ładowania stolików"
+    no_tables: "Brak dostępnych stolików"
+    table_number: "Stolik nr"
+    seats: "Miejsca"

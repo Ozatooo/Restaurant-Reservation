@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'reservation.select.title'|trans }}{% endblock %}
+
+{% block body %}
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-6">{{ 'reservation.select.choose_restaurant'|trans }}</h1>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for restaurant in restaurants %}
+                <div class="bg-white shadow-md rounded-lg p-6 text-center cursor-pointer hover:bg-gray-100 transition"
+                     onclick="openPopup('{{ restaurant.name }}', '{{ restaurant.id }}')">
+                    <h2 class="text-xl font-semibold">{{ restaurant.name }}</h2>
+                    <p class="text-gray-600">{{ restaurant.location }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Popup -->
+    <div id="popup" class="fixed inset-0 flex items-center justify-center bg-blue-600 bg-opacity-10 hidden">
+        <div class="bg-[#f5e3c3] p-6 rounded-lg shadow-2xl w-96 relative bg-white">
+            <button class="absolute top-2 right-2 text-gray-800 hover:text-red-500 text-xl" onclick="closePopup()">&times;</button>
+            <h1 id="popup-title" class="text-2xl font-bold text-center mb-4 text-gray-900"></h1>
+            
+            <form action="{{ path('reservation_add') }}" method="POST" class="space-y-4" data-turbo="false">
+                <input type="hidden" name="restaurant_id" id="restaurant-id">
+                
+                <label class="block">
+                    <span class="text-gray-900 font-semibold">{{ 'reservation.form.customer_name'|trans }}</span>
+                    <input type="text" name="customer_name" class="mt-1 block w-full rounded border-gray-400 p-2" required>
+                </label>
+                
+                <label class="block">
+                    <span class="text-gray-900 font-semibold">{{ 'reservation.form.table'|trans }}</span>
+                    <select name="table_id" id="table-dropdown" class="mt-1 block w-full rounded border-gray-400 p-2 bg-white text-gray-900" required>
+                        <option value="" disabled selected>{{ 'reservation.form.select_table'|trans }}</option>
+                    </select>
+                </label>
+                
+                <label class="block">
+                    <span class="text-gray-900 font-semibold">{{ 'reservation.form.date'|trans }}</span>
+                    <input type="datetime-local" name="date" class="mt-1 block w-full rounded border-gray-400 p-2 bg-white text-gray-900" required>
+                </label>
+                
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-800 transition">{{ 'reservation.form.book'|trans }}</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openPopup(restaurantName, restaurantId) {
+            document.getElementById("popup-title").innerText = restaurantName;
+            document.getElementById("restaurant-id").value = restaurantId;
+            document.getElementById("popup").classList.remove("hidden");
+
+            let tableDropdown = document.getElementById("table-dropdown");
+            tableDropdown.innerHTML = '<option value="" disabled selected>{{ 'reservation.form.loading'|trans }}</option>';
+
+            fetch(`/api/tables/${restaurantId}`)
+                .then(response => response.json())
+                .then(data => {
+                    let tableDropdown = document.getElementById("table-dropdown");
+                    tableDropdown.innerHTML = "";
+
+                    if (!data.tables || !Array.isArray(data.tables)) {
+                        console.error("Błąd: Oczekiwano tablicy stolików, ale jej nie ma.");
+                        tableDropdown.innerHTML = '<option value="" disabled>{{ 'reservation.form.loading_error'|trans }}</option>';
+                        return;
+                    }
+
+                    if (data.tables.length === 0) {
+                        tableDropdown.innerHTML = '<option value="" disabled>{{ 'reservation.form.no_tables'|trans }}</option>';
+                        return;
+                    }
+
+                    data.tables.forEach(table => {
+                        let option = document.createElement("option");
+                        option.value = table.id;
+                        option.textContent = `{{ 'reservation.form.table_number'|trans }} ${table.number} ({{ 'reservation.form.seats'|trans }} ${table.seats})`;
+                        tableDropdown.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error("Błąd podczas pobierania stolików:", error);
+                    document.getElementById("table-dropdown").innerHTML = '<option value="" disabled>{{ 'reservation.form.loading_error'|trans }}</option>';
+                });
+        }
+
+        function closePopup() {
+            document.getElementById("popup").classList.add("hidden");
+        }
+    </script>
+{% endblock %}

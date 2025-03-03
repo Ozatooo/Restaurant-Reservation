@@ -1,0 +1,34 @@
+dashboard:
+  title: "Dashboard"
+  main_panel: "Main Panel"
+  reservation_count: "Number of Reservations"
+  restaurant_count: "Number of Restaurants"
+  reservations_per_day: "Number of Reservations per Day"
+  restaurant_reservations_per_day: "Number of Reservations in Restaurants per Day"
+  reservations_in_restaurants: "Reservations in Restaurants"
+  restaurant: "Restaurant"
+
+reservations:
+  title: "Reservations"
+  list: "Reservation List"
+  search: "Search reservation..."
+  name: "Name"
+  table: "Table"
+  date: "Date"
+  no_reservations: "No reservations available"
+
+reservation:
+  select:
+    title: "Select a Restaurant"
+    choose_restaurant: "Choose a restaurant to make a reservation"
+  form:
+    customer_name: "Customer Name"
+    table: "Table"
+    select_table: "Select a table..."
+    date: "Date"
+    book: "Book Now"
+    loading: "Loading..."
+    loading_error: "Error loading tables"
+    no_tables: "No available tables"
+    table_number: "Table No."
+    seats: "Seats"

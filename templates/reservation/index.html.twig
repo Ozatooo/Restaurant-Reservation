@@ -1,0 +1,105 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'reservations.title'|trans }}{% endblock %}
+
+{% block body %}
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-6">{{ 'reservations.list'|trans }}</h1>
+
+        <div class="space-y-6">
+            {% for restaurant in restaurants %}
+                <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+                    <div class="flex justify-between items-center cursor-pointer" onclick="toggleReservations('{{ restaurant.id }}')">
+                        <h2 class="text-xl font-semibold">{{ restaurant.name }}</h2>
+                        <span id="arrow-{{ restaurant.id }}" class="transform transition-transform">▼</span>
+                    </div>
+                    <div id="reservations-{{ restaurant.id }}" class="hidden mt-4">
+                        {% set filtered_reservations = reservations | filter(res => res.table.restaurant.id == restaurant.id) %}
+                        
+                        {% if filtered_reservations is not empty %}
+                            <input type="text" id="search-{{ restaurant.id }}" 
+                                   class="w-full p-2 mb-4 border border-gray-300 rounded"
+                                   placeholder="{{ 'reservations.search'|trans }}" 
+                                   onkeyup="filterTable('{{ restaurant.id }}')">
+                            
+                            <table class="!w-full border border-gray-300 mt-4">
+                                <thead>
+                                    <tr class="bg-gray-200">
+                                        <th class="border border-gray-300 p-2 cursor-pointer" 
+                                            onclick="sortTable('{{ restaurant.id }}', 0)">{{ 'reservations.name'|trans }} ⬍</th>
+                                        <th class="border border-gray-300 p-2 cursor-pointer" 
+                                            onclick="sortTable('{{ restaurant.id }}', 1)">{{ 'reservations.table'|trans }} ⬍</th>
+                                        <th class="border border-gray-300 p-2 cursor-pointer" 
+                                            onclick="sortTable('{{ restaurant.id }}', 2)">{{ 'reservations.date'|trans }} ⬍</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body-{{ restaurant.id }}">
+                                    {% for reservation in filtered_reservations %}
+                                        <tr class="border border-gray-300">
+                                            <td class="p-2">{{ reservation.customerName }}</td>
+                                            <td class="p-2 text-center">Nr {{ reservation.table.number }}</td>
+                                            <td class="p-2">{{ reservation.date|date('Y-m-d H:i') }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p class="text-gray-500 mt-2">{{ 'reservations.no_reservations'|trans }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        function toggleReservations(restaurantId) {
+            let section = document.getElementById("reservations-" + restaurantId);
+            let arrow = document.getElementById("arrow-" + restaurantId);
+
+            if (section.classList.contains("hidden")) {
+                section.classList.remove("hidden");
+                arrow.classList.add("rotate-180");
+            } else {
+                section.classList.add("hidden");
+                arrow.classList.remove("rotate-180");
+            }
+        }
+
+        function sortTable(restaurantId, columnIndex) {
+            let tableBody = document.getElementById("table-body-" + restaurantId);
+            let rows = Array.from(tableBody.rows);
+            let sortOrder = tableBody.getAttribute("data-sort") === "asc" ? "desc" : "asc";
+
+            rows.sort((rowA, rowB) => {
+                let cellA = rowA.cells[columnIndex].innerText.trim();
+                let cellB = rowB.cells[columnIndex].innerText.trim();
+
+                if (columnIndex === 2) {
+                    return sortOrder === "asc" ? new Date(cellA) - new Date(cellB) : new Date(cellB) - new Date(cellA);
+                }
+                return sortOrder === "asc" ? cellA.localeCompare(cellB, undefined, { numeric: true }) 
+                                           : cellB.localeCompare(cellA, undefined, { numeric: true });
+            });
+
+            rows.forEach(row => tableBody.appendChild(row));
+            tableBody.setAttribute("data-sort", sortOrder);
+        }
+
+        function filterTable(restaurantId) {
+            let input = document.getElementById("search-" + restaurantId).value.toLowerCase();
+            let rows = document.getElementById("table-body-" + restaurantId).getElementsByTagName("tr");
+
+            for (let row of rows) {
+                let text = row.innerText.toLowerCase();
+                row.style.display = text.includes(input) ? "" : "none";
+            }
+        }
+
+        window.toggleReservations = toggleReservations;
+        window.sortTable = sortTable;
+        window.filterTable = filterTable;
+    });
+</script>
+{% endblock %}
