@@ -25,6 +25,16 @@
                 <canvas id="restaurantReservationsChart" class="w-full h-64"></canvas>
             </div>
         </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">{{ 'dashboard.reservations_per_restaurant'|trans }}</h2>
+                <canvas id="restaurantPieChart" class="w-full h-64"></canvas>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold mb-4">{{ 'dashboard.table_size_reservations'|trans }}</h2>
+                <canvas id="tableSizePieChart" class="w-full h-64"></canvas>
+            </div>
+        </div>
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h2 class="text-xl font-bold mb-4">{{ 'dashboard.reservations_in_restaurants'|trans }}</h2>
             <div class="overflow-y-auto max-h-96">
@@ -53,7 +63,7 @@
             </div>
         </div>
     </div>
-
+        
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -101,8 +111,54 @@
                 }
             });
 
+            const restaurantPieData = {{ reservationsPerRestaurant|json_encode()|raw }};
+            const restaurantNames = Object.keys(restaurantPieData);
+            const reservationCounts = Object.values(restaurantPieData);
+
+            new Chart(document.getElementById("restaurantPieChart"), {
+                type: 'pie',
+                data: {
+                    labels: restaurantNames,
+                    datasets: [{
+                        data: reservationCounts,
+                        backgroundColor: restaurantNames.map(() => getRandomColor()),
+                    }]
+                },
+                options: {
+                    responsive: true,
+                }
+            });
+
+            const tableSizeData = {{ tableSizeReservations|json_encode()|raw }};
+            const tablesLabels = Object.keys(tableSizeData).map(size => `${size} osobowe`);
+            const tablesData = Object.values(tableSizeData);
+            const colors = generateRandomColors(tablesData.length);
+            const ctx = document.getElementById("tableSizePieChart").getContext("2d");
+
+            new Chart(ctx, {
+                type: "pie",
+                data: {
+                    labels: tablesLabels,
+                    datasets: [{
+                    label: "{{ 'dashboard.table_size_reservations'|trans }}",
+                    data: tablesData,
+                    backgroundColor: colors,
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+
+
             function getRandomColor() {
                 return `hsl(${Math.random() * 360}, 70%, 50%)`;
+            }
+
+            function generateRandomColors(count) {
+                return Array.from({ length: count }, () =>
+                    `hsl(${Math.random() * 360 * count}, 70%, 50%)`
+                );
             }
         });
     </script>

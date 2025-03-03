@@ -7,7 +7,8 @@ dashboard:
   restaurant_reservations_per_day: "Number of Reservations in Restaurants per Day"
   reservations_in_restaurants: "Reservations in Restaurants"
   restaurant: "Restaurant"
-
+  reservations_per_restaurant: 'Reservations per Restaurant'
+  table_size_reservations: "Table Size Reservations"
 reservations:
   title: "Reservations"
   list: "Reservation List"
