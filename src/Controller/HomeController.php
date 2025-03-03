@@ -18,15 +18,14 @@ final class HomeController extends AbstractController
         $restaurantCount = count($restaurants);
         $reservationCount = count($reservations);
     
-        // Ilość rezerwacji na dzień
         $reservationsPerDay = [];
         foreach ($reservations as $res) {
             $date = $res->getDate()->format('Y-m-d');
             $reservationsPerDay[$date] = ($reservationsPerDay[$date] ?? 0) + 1;
         }
-        ksort($reservationsPerDay); // Sortowanie dat rosnąco
-    
-        // Ilość rezerwacji w restauracjach na dzień
+
+        ksort($reservationsPerDay);
+
         $reservationsByRestaurantPerDay = [];
         foreach ($restaurants as $restaurant) {
             foreach ($reservations as $res) {
@@ -38,7 +37,6 @@ final class HomeController extends AbstractController
             }
         }
     
-        // Upewniamy się, że daty w tabeli są zgodne z wykresem
         $allDates = array_keys($reservationsPerDay);
         foreach ($reservationsByRestaurantPerDay as &$restaurantReservations) {
             foreach ($allDates as $date) {
@@ -47,11 +45,37 @@ final class HomeController extends AbstractController
             ksort($restaurantReservations);
         }
         
+        $reservationsPerRestaurant = [];
+
+        foreach ($restaurants as $restaurant) {
+            foreach ($reservations as $res) {
+                if ($res->getTable()->getRestaurant()->getId() === $restaurant->getId()) {
+                    $reservationsPerRestaurant[$restaurant->getName()] = 
+                        ($reservationsPerRestaurant[$restaurant->getName()] ?? 0) + 1;
+                }
+            }
+        }
+        
+        $tableSizeReservations = [];
+
+        foreach ($reservations as $res) {
+            $tableSize = $res->getTable()->getSeats();
+
+            if (!isset($tableSizeReservations[$tableSize])) {
+                $tableSizeReservations[$tableSize] = 0;
+            }
+
+            $tableSizeReservations[$tableSize]++;
+        }
+
+
         return $this->render('home.html.twig', [
             'restaurantCount' => $restaurantCount,
             'reservationCount' => $reservationCount,
             'reservationsPerDay' => $reservationsPerDay,
             'reservationsByRestaurantPerDay' => $reservationsByRestaurantPerDay,
+            'reservationsPerRestaurant' => $reservationsPerRestaurant,
+            'tableSizeReservations' => $tableSizeReservations,
         ]);
     }
     

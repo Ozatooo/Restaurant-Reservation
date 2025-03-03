@@ -2,7 +2,7 @@
 
 System rezerwacji stolików dla restauracji, oparty na Symfony, Twig oraz TailwindCSS. Umożliwia zarządzanie rezerwacjami, wybór stolików oraz dynamiczne filtrowanie i sortowanie listy rezerwacji.
 
-![Main View](screenshots/main_view.JPG)
+![Main View](screenshots/main_view.png)
 
 ## 🚀 Funkcje
 
